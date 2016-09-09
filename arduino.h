@@ -17,25 +17,16 @@
   do nothing.
 
   For the AVR definitions, see /usr/lib/avr/include/avr/pgmspace.h on Linux.
+
+  With GCC 4.7 we can replace any pgm_read_* with vanilla C. Instead of PROGMEM
+  we use the __flash keyword. The compiler can check anything and we can't miss
+  any pgm_read_* anymore.
+
+  Use XSTR like PSTR in PROGMEM-context.
 */
-#ifdef __AVR__
-
-  #define USE_PROGMEM
-  #ifdef USE_PROGMEM
-    #include <avr/pgmspace.h>
-  #endif
-
-#else
-
-  #define PROGMEM
-  #define PGM_P const char *
-  #define PSTR(s) ((const PROGMEM char *)(s))
-  #define pgm_read_byte(x) (*((uint8_t *)(x)))
-  #define pgm_read_word(x) (*((uint16_t *)(x)))
-  #define pgm_read_dword(x) (*((uint32_t *)(x)))
+#ifndef __AVR__
   #define __flash
-
-#endif /* __AVR__, ! __AVR__ */
+#endif /* ! __AVR__ */
 
 #define FSTR(X) ((const __flash char[]) { X })
 #define XSTR(X) ({static const __flash char __s[] = X; &__s[0];})
@@ -46,6 +37,9 @@
 	added as necessary or if I feel like it- not a comprehensive list!
 */
 #if defined __AVR__
+
+  // avr/io.h is mainly for pinnames PA1 etc.
+  #include <avr/io.h>
 
 #if defined (__AVR_ATmega168__) || defined (__AVR_ATmega328__) || \
     defined (__AVR_ATmega328P__)
