@@ -20,7 +20,10 @@
 */
 #ifdef __AVR__
 
-  #include <avr/pgmspace.h>
+  #define USE_PROGMEM
+  #ifdef USE_PROGMEM
+    #include <avr/pgmspace.h>
+  #endif
 
 #else
 
@@ -30,8 +33,12 @@
   #define pgm_read_byte(x) (*((uint8_t *)(x)))
   #define pgm_read_word(x) (*((uint16_t *)(x)))
   #define pgm_read_dword(x) (*((uint32_t *)(x)))
+  #define __flash
 
 #endif /* __AVR__, ! __AVR__ */
+
+#define FSTR(X) ((const __flash char[]) { X })
+#define XSTR(X) ({static const __flash char __s[] = X; &__s[0];})
 
 /*
 	ports and functions

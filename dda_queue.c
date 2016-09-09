@@ -174,7 +174,7 @@ void next_move() {
 /// DEBUG - print queue.
 /// Qt/hs format, t is tail, h is head, s is F/full, E/empty or neither
 void print_queue() {
-  sersendf_P(PSTR("Queue: %d/%d%c\n"), mb_tail, mb_head, (queue_full()?'F':(queue_empty()?'E':' ')));
+  sersendf_F(XSTR("Queue: %d/%d%c\n"), mb_tail, mb_head, (queue_full()?'F':(queue_empty()?'E':' ')));
 }
 
 /// dump queue for emergency stop.

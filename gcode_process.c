@@ -333,7 +333,7 @@ void process_gcode_command() {
 
 				// unknown gcode: spit an error
 			default:
-				sersendf_P(PSTR("E: Bad G-code %d\n"), next_target.G);
+				sersendf_F(XSTR("E: Bad G-code %d\n"), next_target.G);
 				return;
 		}
 	}
@@ -611,13 +611,13 @@ void process_gcode_command() {
 					queue_wait();
 				#endif
 				update_current_position();
-				sersendf_P(PSTR("X:%lq,Y:%lq,Z:%lq,E:%lq,F:%lu\n"),
+				sersendf_F(XSTR("X:%lq,Y:%lq,Z:%lq,E:%lq,F:%lu\n"),
                         current_position.axis[X], current_position.axis[Y],
                         current_position.axis[Z], current_position.axis[E],
 				                current_position.F);
 
         if (DEBUG_POSITION && (debug_flags & DEBUG_POSITION)) {
-          sersendf_P(PSTR("Endpoint: X:%ld,Y:%ld,Z:%ld,E:%ld,F:%lu,c:%lu}\n"),
+          sersendf_F(XSTR("Endpoint: X:%ld,Y:%ld,Z:%ld,E:%ld,F:%lu,c:%lu}\n"),
                      movebuffer[mb_tail].endpoint.axis[X],
                      movebuffer[mb_tail].endpoint.axis[Y],
                      movebuffer[mb_tail].endpoint.axis[Z],
@@ -646,7 +646,7 @@ void process_gcode_command() {
 				//?  FIRMWARE_NAME:Teacup FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 TEMP_SENSOR_COUNT:1 HEATER_COUNT:1
 				//?
 
-				sersendf_P(PSTR("FIRMWARE_NAME:Teacup FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:%d TEMP_SENSOR_COUNT:%d HEATER_COUNT:%d\n"), 1, NUM_TEMP_SENSORS, NUM_HEATERS);
+				sersendf_F(XSTR("FIRMWARE_NAME:Teacup FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:%d TEMP_SENSOR_COUNT:%d HEATER_COUNT:%d\n"), 1, NUM_TEMP_SENSORS, NUM_HEATERS);
 				break;
 
 			case 116:
@@ -829,7 +829,7 @@ void process_gcode_command() {
 
 				// unknown mcode: spit an error
 			default:
-				sersendf_P(PSTR("E: Bad M-code %d\n"), next_target.M);
+				sersendf_F(XSTR("E: Bad M-code %d\n"), next_target.M);
 		} // switch (next_target.M)
 	} // else if (next_target.seen_M)
 } // process_gcode_command()

@@ -166,7 +166,7 @@ void dda_create(DDA *dda, const TARGET *target) {
   memcpy(&(dda->endpoint), target, sizeof(TARGET));
 
 	if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-    sersendf_P(PSTR("\nCreate: X %lq  Y %lq  Z %lq  F %lu\n"),
+    sersendf_F(XSTR("\nCreate: X %lq  Y %lq  Z %lq  F %lu\n"),
                dda->endpoint.axis[X], dda->endpoint.axis[Y],
                dda->endpoint.axis[Z], dda->endpoint.F);
 
@@ -256,7 +256,7 @@ void dda_create(DDA *dda, const TARGET *target) {
 	}
 
 	if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-    sersendf_P(PSTR("[%ld,%ld,%ld,%ld]"),
+    sersendf_F(XSTR("[%ld,%ld,%ld,%ld]"),
                target->axis[X] - startpoint.axis[X], target->axis[Y] - startpoint.axis[Y],
                target->axis[Z] - startpoint.axis[Z], target->axis[E] - startpoint.axis[E]);
 
@@ -274,7 +274,7 @@ void dda_create(DDA *dda, const TARGET *target) {
   }
 
 	if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-    sersendf_P(PSTR(" [ts:%lu"), dda->total_steps);
+    sersendf_F(XSTR(" [ts:%lu"), dda->total_steps);
 
 	if (dda->total_steps == 0) {
 		dda->nullmove = 1;
@@ -303,7 +303,7 @@ void dda_create(DDA *dda, const TARGET *target) {
 			distance = delta_um[E];
 
 		if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-			sersendf_P(PSTR(",ds:%lu"), distance);
+			sersendf_F(XSTR(",ds:%lu"), distance);
 
     #ifdef	ACCELERATION_TEMPORAL
       // bracket part of this equation in an attempt to avoid overflow:
@@ -362,7 +362,7 @@ void dda_create(DDA *dda, const TARGET *target) {
       dda->end_c = c_limit;
 
 		if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-      sersendf_P(PSTR(",md:%lu,c:%lu"), move_duration, dda->c);
+      sersendf_F(XSTR(",md:%lu,c:%lu"), move_duration, dda->c);
 
     if (dda->c != dda->end_c) {
 			uint32_t stF = startpoint.F / 4;
@@ -399,7 +399,7 @@ void dda_create(DDA *dda, const TARGET *target) {
 			}
 
 			if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-        sersendf_P(PSTR("\n{DDA:CA end_c:%lu, n:%ld, md:%lu, ssq:%lu, esq:%lu, dsq:%lu, msbssq:%u, msbtot:%u}\n"), dda->end_c, dda->n, move_duration, ssq, esq, dsq, msb_ssq, msb_tot);
+        sersendf_F(XSTR("\n{DDA:CA end_c:%lu, n:%ld, md:%lu, ssq:%lu, esq:%lu, dsq:%lu, msbssq:%u, msbtot:%u}\n"), dda->end_c, dda->n, move_duration, ssq, esq, dsq, msb_ssq, msb_tot);
 
 			dda->accel = 1;
 		}
@@ -494,7 +494,7 @@ void dda_start(DDA *dda) {
 	// called from interrupt context: keep it simple!
 
   if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-    sersendf_P(PSTR("Start: X %lq  Y %lq  Z %lq  F %lu\n"),
+    sersendf_F(XSTR("Start: X %lq  Y %lq  Z %lq  F %lu\n"),
                dda->endpoint.axis[X], dda->endpoint.axis[Y],
                dda->endpoint.axis[Z], dda->endpoint.F);
 
