@@ -470,7 +470,7 @@ void dda_create(DDA *dda, const TARGET *target) {
 	} /* ! dda->total_steps == 0 */
 
 	if (DEBUG_DDA && (debug_flags & DEBUG_DDA))
-		serial_writestr_P(PSTR("] }\n"));
+		serial_writestr_F(XSTR("] }\n"));
 
 	// next dda starts where we finish
 	memcpy(&startpoint, &dda->endpoint, sizeof(TARGET));

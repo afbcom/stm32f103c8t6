@@ -81,7 +81,7 @@ void queue_step() {
       timer_set(HEATER_WAIT_TIMEOUT, 0);
 			if (temp_achieved()) {
 				current_movebuffer->live = current_movebuffer->done = 0;
-				serial_writestr_P(PSTR("Temp achieved\n"));
+				serial_writestr_F(XSTR("Temp achieved\n"));
 			}
       else {
         temp_print(TEMP_SENSOR_none);
@@ -161,7 +161,7 @@ void next_move() {
     // interrupt routine.
 		mb_tail = t;
 		if (current_movebuffer->waitfor_temp) {
-			serial_writestr_P(PSTR("Waiting for target temp\n"));
+			serial_writestr_F(XSTR("Waiting for target temp\n"));
 			current_movebuffer->live = 1;
       timer_set(HEATER_WAIT_TIMEOUT, 0);
 		}
