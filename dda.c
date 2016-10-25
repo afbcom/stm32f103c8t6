@@ -941,6 +941,17 @@ void dda_clock() {
         }
       ATOMIC_END
     }
+    else {
+      // We only calculate the new c with excecuted steps before
+      // and so we can't achieve real travel speed.
+      // this else-tree will fix 
+      // https://github.com/Traumflug/Teacup_Firmware/issues/69
+      if (dda->c > dda->c_min) {
+        ATOMIC_START
+        dda->c = dda->c_min;
+        ATOMIC_END
+      }
+    }
   #endif
 }
 
