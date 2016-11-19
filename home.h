@@ -3,6 +3,7 @@
 
 void home(void);
 
+void home_none(void);
 void home_x_negative(void);
 void home_x_positive(void);
 void home_y_negative(void);
