@@ -437,9 +437,15 @@ void dda_create(DDA *dda, const TARGET *target) {
         dda->n = dda->start_steps;
         if (dda->n == 0)
           dda->c = pgm_read_dword(&c0_P[dda->fast_axis]);
-        else
-          dda->c = (pgm_read_dword(&c0_P[dda->fast_axis]) *
-                    int_inv_sqrt(dda->n)) >> 13;
+        else {
+          #ifdef __AVR__
+            dda->c = (pgm_read_dword(&c0_P[dda->fast_axis]) *
+                      int_inv_sqrt(dda->n)) >> 13;
+          #elif defined __ARMEL__
+            dda->c = pgm_read_dword(&c0_P[dda->fast_axis]) /
+                      (2 * int_sqrt(dda->n));
+          #endif
+        }
         if (dda->c < dda->c_min)
           dda->c = dda->c_min;
       #else
@@ -894,8 +900,13 @@ void dda_clock() {
         // Explicit formula: c0 * (sqrt(n + 1) - sqrt(n)),
         // approximation here: c0 * (1 / (2 * sqrt(n))).
         // This >> 13 looks odd, but is verified with the explicit formula.
-        move_c = (pgm_read_dword(&c0_P[dda->fast_axis]) *
-                  int_inv_sqrt(move_n)) >> 13;
+        #ifdef __AVR__
+          move_c = (pgm_read_dword(&c0_P[dda->fast_axis]) *
+                    int_inv_sqrt(move_n)) >> 13;
+        #elif defined __ARMEL__
+          move_c = pgm_read_dword(&c0_P[dda->fast_axis]) /
+                    (2 * int_sqrt(move_n));
+        #endif
 
       // TODO: most likely this whole check is obsolete. It was left as a
       //       safety margin, only. Rampup steps calculation should be accurate
