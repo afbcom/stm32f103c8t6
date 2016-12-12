@@ -736,9 +736,10 @@ void dda_clock() {
     dda = mb_tail_dda;
   ATOMIC_END
   if (dda != last_dda) {
-    move_state.debounce_count_x =
-    move_state.debounce_count_z =
-    move_state.debounce_count_y = 0;
+    enum axis_e i;
+    for (i = X; i < E; i++) {
+      move_state.debounce_count[i] = 0;
+    }
     last_dda = dda;
   }
 
@@ -753,57 +754,57 @@ void dda_clock() {
     #ifdef X_MIN_PIN
     if (dda->endstop_check & 0x01) {
       if (x_min() == dda->endstop_stop_cond)
-        move_state.debounce_count_x++;
+        move_state.debounce_count[X]++;
       else
-        move_state.debounce_count_x = 0;
-      endstop_trigger = move_state.debounce_count_x >= ENDSTOP_STEPS;
+        move_state.debounce_count[X] = 0;
+      endstop_trigger = move_state.debounce_count[X] >= ENDSTOP_STEPS;
     }
     #endif
     #ifdef X_MAX_PIN
     if (dda->endstop_check & 0x02) {
       if (x_max() == dda->endstop_stop_cond)
-        move_state.debounce_count_x++;
+        move_state.debounce_count[X]++;
       else
-        move_state.debounce_count_x = 0;
-      endstop_trigger = move_state.debounce_count_x >= ENDSTOP_STEPS;
+        move_state.debounce_count[X] = 0;
+      endstop_trigger = move_state.debounce_count[X] >= ENDSTOP_STEPS;
     }
     #endif
 
     #ifdef Y_MIN_PIN
     if (dda->endstop_check & 0x04) {
       if (y_min() == dda->endstop_stop_cond)
-        move_state.debounce_count_y++;
+        move_state.debounce_count[Y]++;
       else
-        move_state.debounce_count_y = 0;
-      endstop_trigger = move_state.debounce_count_y >= ENDSTOP_STEPS;
+        move_state.debounce_count[Y] = 0;
+      endstop_trigger = move_state.debounce_count[Y] >= ENDSTOP_STEPS;
     }
     #endif
     #ifdef Y_MAX_PIN
     if (dda->endstop_check & 0x08) {
       if (y_max() == dda->endstop_stop_cond)
-        move_state.debounce_count_y++;
+        move_state.debounce_count[Y]++;
       else
-        move_state.debounce_count_y = 0;
-      endstop_trigger = move_state.debounce_count_y >= ENDSTOP_STEPS;
+        move_state.debounce_count[Y] = 0;
+      endstop_trigger = move_state.debounce_count[Y] >= ENDSTOP_STEPS;
     }
     #endif
 
     #ifdef Z_MIN_PIN
     if (dda->endstop_check & 0x10) {
       if (z_min() == dda->endstop_stop_cond)
-        move_state.debounce_count_z++;
+        move_state.debounce_count[Z]++;
       else
-        move_state.debounce_count_z = 0;
-      endstop_trigger = move_state.debounce_count_z >= ENDSTOP_STEPS;
+        move_state.debounce_count[Z] = 0;
+      endstop_trigger = move_state.debounce_count[Z] >= ENDSTOP_STEPS;
     }
     #endif
     #ifdef Z_MAX_PIN
     if (dda->endstop_check & 0x20) {
       if (z_max() == dda->endstop_stop_cond)
-        move_state.debounce_count_z++;
+        move_state.debounce_count[Z]++;
       else
-        move_state.debounce_count_z = 0;
-      endstop_trigger = move_state.debounce_count_z >= ENDSTOP_STEPS;
+        move_state.debounce_count[Z] = 0;
+      endstop_trigger = move_state.debounce_count[Z] >= ENDSTOP_STEPS;
     }
     #endif
 

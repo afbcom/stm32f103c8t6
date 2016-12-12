@@ -27,9 +27,17 @@ typedef uint32_t axes_uint32_t[AXIS_COUNT];
   \typedef axes_int32_t
   \brief n-dimensional vector used to describe int32_t axis information.
 
-  Stored value can be anything unsigned. Units should be specified when declared.
+  Stored value can be anything signed. Units should be specified when declared.
 */
 typedef int32_t axes_int32_t[AXIS_COUNT];
+
+/**
+  \typedef axes_uint8_t
+  \brief n-dimensional vector used to describe uint8_t axis information.
+
+  Stored value can be anything unsigned. Units should be specified when declared.
+*/
+typedef uint8_t axes_uint8_t[AXIS_COUNT];
 
 /**
 	\struct TARGET
@@ -67,7 +75,7 @@ typedef struct {
 
 	/// Endstop handling.
   uint8_t endstop_stop; ///< Stop due to endstop trigger
-  uint8_t debounce_count_x, debounce_count_y, debounce_count_z;
+  axes_uint8_t debounce_count;
 } MOVE_STATE;
 
 /**
