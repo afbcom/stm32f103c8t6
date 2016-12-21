@@ -137,8 +137,8 @@ typedef struct {
   // Number the moves to be able to test at the end of lookahead if the moves
   // are the same. Note: we do not need a lot of granularity here: more than
   // MOVEBUFFER_SIZE is already enough.
-  uint8_t           id;
   #endif
+  uint8_t           id;
 	#endif
 	#ifdef ACCELERATION_TEMPORAL
   axes_uint32_t     step_interval;   ///< time between steps on each axis
