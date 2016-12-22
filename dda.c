@@ -897,6 +897,7 @@ void dda_clock() {
         move_c = (pgm_read_dword(&c0_P[dda->fast_axis]) *
                   int_inv_sqrt(move_n)) >> 13;
 
+      #ifdef ACCELERATION_TEMPORAL
       axes_uint32_t interval;
       for (enum axis_e n = X; n < AXIS_COUNT; n++) {
         if (dda->delta[n])
@@ -907,6 +908,7 @@ void dda_clock() {
         else
           interval[n] = 0xFFFFFFFF;
       }
+      #endif
 
       // Write results.
       ATOMIC_START
