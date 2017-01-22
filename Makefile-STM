@@ -1,0 +1,276 @@
+##############################################################################
+#                                                                            #
+# Teacup - Lean and efficient firmware for RepRap printers                   #
+#                                                                            #
+# by Triffid Hunter, Traumflug, jakepoz, many others.                        #
+#                                                                            #
+# This firmware is Copyright (c) ...                                         #
+#   2009 - 2010 Michael Moon aka Triffid_Hunter                              #
+#   2010 - 2013 Markus "Traumflug" Hitter <mah@jump-ing.de>                  #
+#                                                                            #
+# This program is free software; you can redistribute it and/or modify       #
+# it under the terms of the GNU General Public License as published by       #
+# the Free Software Foundation; either version 2 of the License, or          #
+# (at your option) any later version.                                        #
+#                                                                            #
+# This program is distributed in the hope that it will be useful,            #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+# GNU General Public License for more details.                               #
+#                                                                            #
+# You should have received a copy of the GNU General Public License          #
+# along with this program; if not, write to the Free Software                #
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA #
+#                                                                            #
+##############################################################################
+
+##############################################################################
+#                                                                            #
+# Makefile for ARM targets. Use it with                                      #
+#                                                                            #
+#   make -f Makefile-ARM                                                     #
+#                                                                            #
+# or copy/link it to Makefile for convenience.                               #
+#                                                                            #
+##############################################################################
+
+##############################################################################
+#                                                                            #
+# Change these to suit your hardware                                         #
+#                                                                            #
+##############################################################################
+
+# MCU ?= lpc1114
+MCU ?= stm32f103
+# MCU ?= stm32f401
+# MCU ?= stm32f411
+# MCU ?= atmega328p
+# MCU ?= atmega644
+# MCU ?= atmega1284p
+# MCU ?= atmega1280
+# MCU ?= atmega2560
+# MCU ?= at90usb1286
+# MCU ?= atmega32u4
+
+
+# some size parameters. Not important for flashing and compiling.
+ifeq ($(MCU), lpc1114)
+  FLASH_SIZE = 32
+  RAM_SIZE = 4
+else ifeq ($(MCU), stm32f411)
+  FLASH_SIZE = 512
+  RAM_SIZE = 128
+#need to fix for flash size for each model
+else ifeq ($(MCU), stm32f401)
+  FLASH_SIZE = 512
+  RAM_SIZE = 96
+else ifeq ($(MCU), stm32f103)
+  FLASH_SIZE = 64
+  RAM_SIZE = 20
+endif
+
+#Set HAL True for HAL Support
+
+ifeq ($(MCU), stm32f401)
+  HAL := TRUE
+  HAL_F4 := TRUE
+else ifeq ($(MCU), stm32f411)
+  HAL := TRUE
+  HAL_F4 := TRUE
+else ifeq ($(MCU), stm32f103)
+  HAL := TRUE
+  HAL_F1 := TRUE
+endif
+
+# CPU clock rate not defined here, but in the CMSIS headers.
+
+##############################################################################
+#                                                                            #
+# Where to find your compiler and linker. Later, this is completed like      #
+#   CC = $(TOOLCHAIN)gcc                                                     #
+#                                                                            #
+##############################################################################
+
+TOOLCHAIN = arm-none-eabi-
+# TOOLCHAIN = <path-to-arduino-folder>/hardware/tools/gcc-arm-none-eabi-4.8.3-2014q1/bin/arm-none-eabi-
+
+##############################################################################
+#                                                                            #
+# Programmer settings for "make program"                                     #
+#                                                                            #
+##############################################################################
+
+# Unlike with AVR, there is no one tool for uploading to all chips. Some
+# need 'lpc21isp', others (e.g. Arduinos) need 'bossac'.
+#
+# To deal with this, we simply define the port here and do the rest directly
+# in the rules for the 'program' target.
+
+# Frequency of the on-chip R/C oscillator or the on-board quartz crystal.
+F_CRYSTAL ?= 12000000
+
+# This is your uploader with any option before your uploadfile $<
+# and your uploadfile (hex, bin or whatelse)
+ifeq ($(MCU), lpc1114)
+  UPLOADER ?= lpc21isp -control
+  UPLOAD_FILE = $(PROGRAM).hex
+else ifeq ($(HAL), TRUE)
+  UPLOADER ?= st-flash write
+  UPLOAD_FILE = $(BUILDDIR)/$(PROGRAM).bin
+endif
+
+ifeq ($(MCU), lpc1114)
+  UPLOADER_FLAGS = $(UPLOADER_PORT)
+  UPLOADER_FLAGS += 115200
+  UPLOADER_FLAGS += $(F_CRYSTAL)
+else ifeq ($(MCU), stm32f411)
+  UPLOADER_FLAGS = 0x8000000
+endif
+
+# Serial port the electronics is connected to.
+UPLOADER_PORT ?= /dev/ttyUSB0
+#UPLOADER_PORT ?= /dev/ttyACM0
+#UPLOADER_PORT ?= com1
+
+##############################################################################
+#                                                                            #
+# Below here, defaults should be ok.                                         #
+#                                                                            #
+##############################################################################
+
+PROGRAM = teacup
+
+# HAL Drivers root directory
+HALROOT = Drivers
+
+# The thing we build by default, and also the thing we clean.
+TARGET = $(PROGRAM).hex
+
+# Arduino IDE takes the "compile everything available"-approach, so we have
+# to keep this working and can take a shortcut:
+SOURCES = $(wildcard *.c)
+
+ifeq ($(MCU), lpc1114)
+  SOURCES += cmsis-system_lpc11xx.c
+else ifeq ($(HAL), TRUE)
+  SUBDIRS = $(shell find $(HALROOT) -type d)
+  TEMPLIST := $(addsuffix /*,$(SUBDIRS))
+  TEMPLIST := $(wildcard $(TEMPLIST))
+  SOURCES += $(filter %.c,$(TEMPLIST))
+endif
+
+# Other target MCU specific adjustments:
+ifeq ($(MCU), lpc1114)
+  STARTUP_FILE = cmsis-startup_lpc11xx.s
+else ifeq ($(MCU), stm32f401)
+  STARTUP_FILE = Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f401xe.s
+else ifeq ($(MCU), stm32f411)
+  STARTUP_FILE = cmsis-startup_stm32f411xe.s
+else ifeq ($(MCU), stm32f103)
+  STARTUP_FILE = DRIVERS/CMSIS/DEVICE/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103xb.s
+endif
+
+# Startup definitions. Not target MCU specific.
+CFLAGS  = -D__STARTUP_CLEAR_BSS -D__START=main
+ifeq ($(MCU), lpc1114)
+  CFLAGS += -mthumb -mcpu=cortex-m0
+  CFLAGS += -mtune=cortex-m0
+  CFLAGS += -D__ARM_LPC1114__
+else ifeq ($(HAL_F4), TRUE)
+  CFLAGS += -mthumb -mcpu=cortex-m4
+  CFLAGS += -mfpu=fpv4-sp-d16
+  CFLAGS += -mfloat-abi=hard
+  CFLAGS += -mlittle-endian
+  CFLAGS += -mthumb-interwork
+  CFLAGS += -D__CORTEX_M4
+  CFLAGS += -DARM_MATH_CM4
+  CFLAGS += -D__ARM_STM32F4HAL__
+  CFLAGS += $(addprefix -I,$(SUBDIRS))
+else ifeq ($(HAL_F1), TRUE)
+  CFLAGS += -mthumb -mcpu=cortex-m3
+  CFLAGS += -mfloat-abi=soft
+  CFLAGS += -mthumb-interwork
+  CFLAGS += -D__CORTEX_M3
+  CFLAGS += -DARM_MATH_CM3
+  CFLAGS += -D__ARM_STM32F1HAL__
+  CFLAGS += $(addprefix -I,$(SUBDIRS))
+endif
+
+ifeq ($(MCU), stm32f401)
+  CFLAGS += -D__ARM_STM32F401__
+else ifeq ($(MCU), stm32f411)
+  CFLAGS += -D__ARM_STM32F411__
+else ifeq ($(MCU), stm32f103)
+  CFLAGS += -D__ARM_STM32F103__
+endif
+
+# Other options ...
+CFLAGS += -Wall
+CFLAGS += -Wstrict-prototypes
+CFLAGS += -Os
+#CFLAGS += -flto
+CFLAGS += -ffunction-sections
+CFLAGS += -fdata-sections
+#CFLAGS += -dM -E # To list all predefined macros into the .o file.
+
+LDFLAGS  = --specs=nano.specs
+LDFLAGS += --specs=nosys.specs
+ifeq ($(MCU), lpc1114)
+  LDFLAGS += -T cmsis-lpc1114.ld
+else ifeq ($(MCU), stm32f401)
+  LDFLAGS += -T cmsis-stm32f401xe.ld
+else ifeq ($(MCU), stm32f411)
+  LDFLAGS += -T cmsis-stm32f411xe.ld
+else ifeq ($(MCU), stm32f103)
+  LDFLAGS += -T cmsis-stm32f103xe.ld
+endif
+LDFLAGS += -Wl,--as-needed
+LDFLAGS += -Wl,--gc-sections
+
+LIBS  = -lm
+
+all: stm32f4hal
+
+-include Makefile-common
+
+# Architecture specific targets
+
+.PHONY: stm32f4hal all program size
+
+all: $(PROGRAM).hex $(BUILDDIR)/$(PROGRAM).lst $(BUILDDIR)/$(PROGRAM).sym size
+
+stm32f4hal:
+	@$(foreach dir,$(SUBDIRS),mkdir -p $(BUILDDIR)/$(dir))
+	@echo $(SUBDIRS)
+
+program: $(UPLOAD_FILE) config.h
+	@echo
+	@echo "To let the bootloader complete his work, connect now PIO0_1 to GND,"
+	@echo "then press Reset for a moment. The bootloader should begin uploading."
+	@echo "After being done, disconnect PIO0_1 and press reset again. On a"
+	@echo "Gen7-ARM, PIO0_1 is the Step pin of the Z stepper driver."
+	@echo
+	$(UPLOADER) $< $(UPLOADER_FLAGS)
+
+$(BUILDDIR)/teacup.elf: $(BUILDDIR)/startup.o
+
+$(BUILDDIR)/startup.o: $(STARTUP_FILE) | $(BUILDDIR)
+	@echo "  CC        $@"
+	@$(CC) -c $(CFLAGS) -o $@ $<
+
+## Interpret TARGET section sizes wrt different ARM chips
+## Usage:  $(call show_size,section-name,section-regex,lpc1114-size-in-k)
+define show_size
+	@$(OBJDUMP) -h $^ | \
+		perl -MPOSIX -ne \
+		'/.($2)\s+([0-9a-f]+)/ && do { $$a += eval "0x$$2" }; \
+		END { printf "    %-7s: %5d bytes         %3d%%\n", "$1", $$a, \
+			ceil($$a * 100 / ($3 * 1024)), \
+		}'
+endef
+
+size: $(BUILDDIR)/$(PROGRAM).elf
+	@echo "    SIZES          ARM...     $(MCU)"
+	$(call show_size,FLASH,text,$(FLASH_SIZE))
+	$(call show_size,RAM,data|bss,$(RAM_SIZE))
+	$(call show_size,EEPROM,eeprom,0.0001)
